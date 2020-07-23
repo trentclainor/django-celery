@@ -25,6 +25,7 @@ TIME_FORMAT = 'h:i a'
 TEACHER_GROUP_ID = 2  # PK of django.contrib.auth.models.Group with the teacher django-admin permissions
 PLANNING_DELTA = timedelta(hours=18)  # booking lag
 CLASS_IS_FINISHED_AFTER = timedelta(minutes=60)  # mark classes as finished after this time
+SUBSCRIPTION_NOT_USED = timedelta(days=7)  # delay for send notification for students who not used a subscriptions
 
 FORMAT_MODULE_PATH = [
     'elk.formats'
@@ -36,6 +37,7 @@ ALLOWED_HOSTS = [
     'a.elk.today',
     'a-staging.elk.today',
     '127.0.0.1',
+    'localhost',
 ]
 ABSOLUTE_HOST = 'https://a.elk.today'
 
@@ -306,6 +308,7 @@ CACHES = {
 
 BROKER_URL = env('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND')
+CELERY_ACCEPT_CONTENT = ['pickle']
 CELERY_TASK_SERIALIZER = 'pickle'
 
 CELERYBEAT_SCHEDULE = {
@@ -320,6 +323,10 @@ CELERYBEAT_SCHEDULE = {
     'bill_timeline_entries': {
         'task': 'accounting.tasks.bill_timeline_entries',
         'schedule': timedelta(minutes=1),
+    },
+    'subscriptions_not_used': {
+        'task': 'market.tasks.subscriptions_not_used',
+        'schedule': timedelta(minutes=30),
     },
 }
 
