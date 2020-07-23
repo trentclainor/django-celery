@@ -1,0 +1,16 @@
+{% extends "mail_templated/base.tpl" %}
+{% load humanize %}
+
+{% block subject %}
+You are not used a subscriptions long time
+{% endblock %}
+
+{% block body %}
+Dear {{ c.customer.first_name | capfirst }},
+
+You are not used a subscriptions from {{ last_used | naturalday:'SHORT_DATE_FORMAT'}} and just loose money.
+
+If you have any questions — simply reply to this message and we'll help you.
+
+{% include 'mailer/_signature.html' %}
+{% endblock %}
