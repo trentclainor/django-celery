@@ -27,6 +27,12 @@ class TestSubscriptionSignals(TestCase):
         self.subscription.deactivate()
         self.assertEqual(handler.call_count, 1)
 
+    def test_not_used_signal_is_beeing_sent(self):
+        handler = MagicMock()
+        signals.subscription_not_used.connect(handler)
+        self.subscription.not_used_notification()
+        self.assertEqual(handler.call_count, 1)
+
     def test_log_entry_creation(self):
         self.subscription.deactivate(user=self.deactivator)
 
