@@ -7,6 +7,7 @@ from mailer.owl import Owl
 class_scheduled = Signal(providing_args=['instance'])  # class is just scheduled
 class_cancelled = Signal(providing_args=['instance', 'src'])  # class is just cancelled
 subscription_deactivated = Signal(providing_args=['user', 'instance'])
+subscription_not_used = Signal(providing_args=['user', 'last_used'])
 
 
 @receiver(subscription_deactivated, dispatch_uid='write_log_entry')
@@ -20,6 +21,21 @@ def write_log_entry_about_subscription_deactivation(sender, **kwargs):
         method called from django-admin, so we can safely ignore it.
         """
         write_admin_log_entry(kwargs['user'], kwargs['instance'], msg='Subscription deactivated')
+
+
+@receiver(subscription_not_used, dispatch_uid='notify_student_subscription_not_used')
+def notify_student_about_subscription_not_used(sender, **kwargs):
+    c = kwargs['instance']
+    owl = Owl(
+        template='mail/class/student/not_used.html',
+        ctx={
+            'c': c,
+            'last_used': kwargs['last_used']
+        },
+        to=[c.customer.user.email],
+        timezone=c.customer.timezone,
+    )
+    owl.send()
 
 
 @receiver(class_scheduled, dispatch_uid='notify_student_class_scheduled')
