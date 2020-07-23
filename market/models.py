@@ -103,6 +103,8 @@ class Subscription(ProductContainer):
     duration = models.DurationField(editable=False)  # every subscription cares a duration field, taken from its product
 
     first_lesson_date = models.DateTimeField('Date of the first lesson', editable=False, null=True)
+    not_used_notification_sent_to_student = models.BooleanField(default=False)
+
 
     def __str__(self):
         return self.name_for_user
@@ -156,6 +158,17 @@ class Subscription(ProductContainer):
         for c in self.classes.filter(is_fully_used=False):
             c.deactivate()
         signals.subscription_deactivated.send(sender=self.__class__, user=user, instance=self)
+
+    def not_used_notification(self, last_used=None):
+        """
+        Mark the subscription is notification sent to student
+        :return:
+        """
+        if last_used is None:
+            last_used = timezone.now() - settings.SUBSCRIPTION_NOT_USED
+        self.not_used_notification_sent_to_student = True
+        self.save()
+        signals.subscription_not_used.send(sender=self.__class__, instance=self, last_used=last_used)
 
     def check_is_fully_finished(self):
         """
